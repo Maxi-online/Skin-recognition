@@ -1,0 +1,7 @@
+{
+  "backend": "v42",
+  "freeze_path": "research/frozen/study_v4_2.json",
+  "method_id": "hybrid",
+  "database_path": "runtime/skin_embeddings_v42_hybrid",
+  "input_mode": "full_frame"
+}

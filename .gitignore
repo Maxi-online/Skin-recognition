@@ -1,0 +1,47 @@
+# Local environments and caches
+.venv/
+.venv-gpu/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.idea/
+.vscode/
+
+# Credentials and local configuration
+.env
+.env.*
+*.pem
+*.key
+
+# Research inputs, biometric templates, and generated artifacts
+/data/
+/runtime/
+/temporaryruntime/
+/models/
+*.onnx
+*.pkl
+*.pickle
+*.npy
+*.npz
+!research/development/v4_classical_multicondition/models/pure_skin_multicondition_best.npz
+*.log
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.mp4
+*.avi
+*.zip
+/research/results/
+/research/publication/
+/research/frozen/relocated_*.json
+
+# Platform files
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,68 @@
+Research-Only Noncommercial License, Version 1.0
+
+Copyright (c) 2026 Maxim Strekolovsky and AERIS LLC
+(Adaptive Energy Robotic Intelligence Systems, LLC).
+All rights reserved except as expressly granted below.
+
+1. Research permission
+
+Subject to this license, the copyright holders grant you a worldwide,
+non-exclusive, royalty-free permission to access, study, copy, run, modify,
+and redistribute this project's original source code, documentation, and
+project-owned model parameters solely for noncommercial research,
+education, evaluation, and scientific reproducibility.
+
+2. Conditions
+
+You must retain this copyright notice, this license, and applicable
+third-party notices in copies and substantial portions of the materials.
+You must identify modifications and must not represent modified results
+or software as an unmodified release of the copyright holders.
+Redistribution of project-owned materials and modifications must preserve
+these research-only, noncommercial restrictions. You may not sublicense
+rights broader than those granted here.
+
+3. Commercial and production use
+
+Commercial use and production deployment require a separate written license
+from the copyright holders. This includes use in a commercial product or
+service, sale or commercial licensing of the materials, a paid or
+commercially supported hosted service, and operational biometric identity
+or access-control deployment. Public availability of this repository does
+not grant such permission. Contact: info@aeris-aerospace.ru.
+
+4. GitHub platform rights
+
+Nothing in this license limits or revokes rights independently granted
+to GitHub, its affiliates, or users under the applicable GitHub Terms of
+Service. This license governs additional use of the project-owned
+materials and does not modify those platform terms.
+
+5. Third-party materials
+
+This license applies only to materials owned by the copyright holders.
+Dependencies, pretrained models, datasets, and other third-party materials
+remain governed by their respective licenses and terms. No additional
+rights to those materials are granted here. In particular, obtaining a
+commercial license for this project does not grant a commercial license
+for InsightFace pretrained weights or research datasets. See
+THIRD_PARTY_NOTICES.md.
+
+6. Names and marks
+
+No trademark rights or rights to imply endorsement are granted.
+
+7. Disclaimer
+
+THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE, ACCURACY, AND NON-INFRINGEMENT. TO THE MAXIMUM EXTENT
+PERMITTED BY APPLICABLE LAW, THE COPYRIGHT HOLDERS SHALL NOT BE LIABLE
+FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE MATERIALS OR
+THEIR USE, WHETHER IN CONTRACT, TORT, OR OTHERWISE.
+
+8. Termination
+
+Permission under this license terminates if you fail to comply with its
+conditions. Rights granted independently under third-party licenses or
+GitHub's Terms of Service are unaffected by this termination provision.

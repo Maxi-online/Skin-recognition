@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Распознавание по коже лица</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #video {
+            width: 100%;
+            display: block;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-recognize {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .status.warning {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .recognition-result {
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .recognition-result h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-item {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .confidence-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.3s;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .face-box {
+            position: absolute;
+            border: 3px solid #00ff00;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        .face-label {
+            position: absolute;
+            background: rgba(0, 255, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Распознавание по коже лица</h1>
+        
+        <div id="status" class="status info hidden"></div>
+        
+        <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" class="canvas-overlay"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="button-group">
+                <button id="startBtn" class="btn-start">Запустить камеру</button>
+                <button id="stopBtn" class="btn-stop" disabled>Остановить камеру</button>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="personName" placeholder="Введите ваше имя для регистрации" />
+                <button id="registerBtn" class="btn-register" disabled>Зарегистрировать</button>
+            </div>
+            
+            <div class="button-group">
+                <button id="recognizeBtn" class="btn-recognize" disabled>Распознать</button>
+            </div>
+        </div>
+        
+        <div id="recognitionResult" class="recognition-result hidden">
+            <h3>Результат распознавания:</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const recognizeBtn = document.getElementById('recognizeBtn');
+        const personNameInput = document.getElementById('personName');
+        const statusDiv = document.getElementById('status');
+        const recognitionResult = document.getElementById('recognitionResult');
+        const resultContent = document.getElementById('resultContent');
+
+        let stream = null;
+        let isRecognizing = false;
+
+        function showStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.classList.remove('hidden');
+            setTimeout(() => {
+                if (type !== 'error' && type !== 'warning') {
+                    statusDiv.classList.add('hidden');
+                }
+            }, 3000);
+        }
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    } 
+                });
+                video.srcObject = stream;
+                
+                video.addEventListener('loadedmetadata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                });
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                registerBtn.disabled = false;
+                recognizeBtn.disabled = false;
+                
+                showStatus('Камера запущена', 'success');
+            } catch (error) {
+                showStatus('Ошибка доступа к камере: ' + error.message, 'error');
+                console.error('Ошибка камеры:', error);
+            }
+        }
+
+        function stopCamera() {
+            // Если камера останавливается — останавливаем и авто-распознавание
+            if (autoRecognizeInterval) {
+                clearInterval(autoRecognizeInterval);
+                autoRecognizeInterval = null;
+                recognizeBtn.textContent = 'Распознать';
+            }
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                video.srcObject = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                registerBtn.disabled = true;
+                recognizeBtn.disabled = true;
+                
+                showStatus('Камера остановлена', 'info');
+            }
+        }
+
+        function drawFaceBox(x, y, w, h, label = '') {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x, y, w, h);
+            
+            if (label) {
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+                ctx.fillRect(x, y - 25, Math.min(w, label.length * 8 + 10), 25);
+                ctx.fillStyle = 'white';
+                ctx.font = '14px Arial';
+                ctx.fillText(label, x + 5, y - 8);
+            }
+        }
+
+        async function captureFrame() {
+            if (!video.videoWidth || !video.videoHeight) {
+                return null;
+            }
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(video, 0, 0);
+            
+            return new Promise((resolve) => {
+                tempCanvas.toBlob(resolve, 'image/jpeg', 0.95);
+            });
+        }
+
+        function makePersonIdFromName(name) {
+            // Стабильный person_id для одного и того же имени (чтобы можно было "дозапоминать" себя)
+            // Разрешаем латиницу/кириллицу/цифры/подчёркивания/дефисы.
+            const cleaned = name
+                .toLowerCase()
+                .trim()
+                .replace(/\s+/g, '_')
+                .replace(/[^\p{L}\p{N}_-]+/gu, '');
+            return cleaned || `user_${Date.now()}`;
+        }
+
+        async function registerPerson() {
+            const name = personNameInput.value.trim();
+            if (!name) {
+                showStatus('Введите имя для регистрации', 'warning');
+                return;
+            }
+
+            if (!stream) {
+                showStatus('Сначала запустите камеру', 'warning');
+                return;
+            }
+
+            try {
+                registerBtn.disabled = true;
+                showStatus('Регистрация...', 'info');
+
+                const imageBlob = await captureFrame();
+                if (!imageBlob) {
+                    throw new Error('Не удалось захватить кадр');
+                }
+
+                const formData = new FormData();
+                formData.append('image', imageBlob, 'frame.jpg');
+                formData.append('person_id', makePersonIdFromName(name));
+                formData.append('person_name', name);
+
+                const response = await fetch('/api/v1/register', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка регистрации');
+                }
+
+                const result = await response.json();
+                showStatus(`Успешно зарегистрирован: ${name}`, 'success');
+                personNameInput.value = '';
+                
+                // Рисуем рамку вокруг лица
+                drawFaceBox(0, 0, canvas.width, canvas.height, `Зарегистрирован: ${name}`);
+                setTimeout(() => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }, 2000);
+                
+            } catch (error) {
+                showStatus('Ошибка регистрации: ' + error.message, 'error');
+                console.error('Ошибка регистрации:', error);
+            } finally {
+                registerBtn.disabled = false;
+            }
+        }
+
+        async function recognizePerson() {
+            if (!stream) {
+                showStatus('Сначала запустите камеру', 'warning');
+                return;
+            }
+
+            if (isRecognizing) {
+                return;
+            }
+
+            try {
+                isRecognizing = true;
+                recognizeBtn.disabled = true;
+                showStatus('Распознавание...', 'info');
+
+                const imageBlob = await captureFrame();
+                if (!imageBlob) {
+                    throw new Error('Не удалось захватить кадр');
+                }
+
+                const formData = new FormData();
+                formData.append('image', imageBlob, 'frame.jpg');
+                formData.append('k', '5');
+
+                const response = await fetch('/api/v1/recognize', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка распознавания');
+                }
+
+                const result = await response.json();
+                
+                if (result.success && result.person_name) {
+                    showStatus(`Распознан: ${result.person_name} (${(result.confidence * 100).toFixed(1)}%)`, 'success');
+                    
+                    // Отображение результата
+                    resultContent.innerHTML = `
+                        <div class="result-item">
+                            <div>
+                                <strong>Имя:</strong> ${result.person_name}<br>
+                                <strong>Уверенность:</strong> ${(result.confidence * 100).toFixed(1)}%
+                            </div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${result.confidence * 100}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (result.candidates && result.candidates.length > 0) {
+                        resultContent.innerHTML += '<h4 style="margin-top: 15px;">Другие кандидаты:</h4>';
+                        result.candidates.slice(1).forEach((candidate, index) => {
+                            resultContent.innerHTML += `
+                                <div class="result-item">
+                                    <span>${candidate.person_name || 'Неизвестно'}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    recognitionResult.classList.remove('hidden');
+                    
+                    // Рисуем рамку вокруг лица
+                    drawFaceBox(0, 0, canvas.width, canvas.height, `${result.person_name} (${(result.confidence * 100).toFixed(0)}%)`);
+                    
+                } else {
+                    showStatus('Лицо не распознано', 'warning');
+                    recognitionResult.classList.add('hidden');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+                
+            } catch (error) {
+                showStatus('Ошибка распознавания: ' + error.message, 'error');
+                console.error('Ошибка распознавания:', error);
+                recognitionResult.classList.add('hidden');
+            } finally {
+                isRecognizing = false;
+                recognizeBtn.disabled = false;
+            }
+        }
+
+        // Обработчики событий
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+        registerBtn.addEventListener('click', registerPerson);
+
+        // Автоматическое распознавание каждые 2 секунды
+        let autoRecognizeInterval = null;
+        
+        recognizeBtn.addEventListener('click', () => {
+            if (autoRecognizeInterval) {
+                clearInterval(autoRecognizeInterval);
+                autoRecognizeInterval = null;
+                recognizeBtn.textContent = 'Распознать';
+                showStatus('Автораспознавание остановлено', 'info');
+            } else {
+                // Стартуем сразу одним запросом, затем каждые 2 секунды
+                recognizePerson();
+                autoRecognizeInterval = setInterval(recognizePerson, 2000);
+                recognizeBtn.textContent = 'Остановить распознавание';
+                showStatus('Автораспознавание включено (каждые 2 сек)', 'success');
+            }
+        });
+
+    </script>
+</body>
+</html>
+

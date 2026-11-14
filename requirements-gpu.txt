@@ -1,0 +1,19 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+numpy==2.2.6
+opencv-python==4.12.0.88
+opencv-python-headless==4.12.0.88
+scikit-learn==1.8.0
+scikit-image==0.26.0
+scipy==1.16.3
+Pillow==12.0.0
+matplotlib==3.10.8
+fastapi==0.127.0
+uvicorn==0.40.0
+pydantic==2.12.5
+python-multipart==0.0.21
+dash==3.3.0
+dash-bootstrap-components==2.0.4
+onnxruntime-gpu==1.23.2
+insightface==0.7.3
+torch==2.9.1+cu128
+torchvision==0.24.1+cu128
